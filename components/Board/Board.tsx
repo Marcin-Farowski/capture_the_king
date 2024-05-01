@@ -93,6 +93,7 @@ const Board: React.FC = () => {
           boardState[row][col] = {
             ...currentCard,
             cardNumber: 6,
+            probabilityOfFive: 0,
           };
       }
     }
@@ -188,7 +189,10 @@ const Board: React.FC = () => {
               ) {
                 const adjacentCard = boardState[newRow][newCol];
                 // Jeśli sąsiadująca karta ma cardNumber równy 7, zwiększ licznik
-                if (adjacentCard.cardNumber === 7) {
+                if (
+                  adjacentCard.cardNumber === 7 ||
+                  adjacentCard.cardNumber === 4
+                ) {
                   countAdjacentSevens++;
                 }
               }
@@ -209,14 +213,14 @@ const Board: React.FC = () => {
               ) {
                 const adjacentCard = boardState[newRow][newCol];
                 if (adjacentCard.cardNumber === 7) {
-                  // const oldProbabilityOfFive =
-                  //   boardState[newRow][newCol].probabilityOfFive;
+                  const oldProbabilityOfFive =
+                    boardState[newRow][newCol].probabilityOfFive;
                   const newProbabilityOfFive = 1 / countAdjacentSevens;
                   // Ustaw probabilityOfFive dla każdej karty o cardNumber === 7
-                  // if (newProbabilityOfFive > oldProbabilityOfFive) {
-                  boardState[newRow][newCol].probabilityOfFive =
-                    newProbabilityOfFive;
-                  // }
+                  if (newProbabilityOfFive > oldProbabilityOfFive) {
+                    boardState[newRow][newCol].probabilityOfFive =
+                      newProbabilityOfFive;
+                  }
                 }
               }
             }
