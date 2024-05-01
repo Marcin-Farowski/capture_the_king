@@ -2,19 +2,19 @@ import React from "react";
 
 interface CardProps {
   cardNumber: number;
-  probabilityOfFive: number;
-  fiveExcluded: boolean;
-  selected: boolean;
-  adjacentToFive: boolean;
+  probabilityOfFive?: number;
+  selected?: boolean;
+  adjacentToFive?: boolean;
+  isButton?: boolean;
   onClick: () => void;
 }
 
 const Card: React.FC<CardProps> = ({
   cardNumber,
-  probabilityOfFive,
-  fiveExcluded,
-  selected,
-  adjacentToFive,
+  probabilityOfFive = 0,
+  selected = false,
+  adjacentToFive = false,
+  isButton = false,
   onClick,
 }) => {
   let backgroundPosition = "";
@@ -50,8 +50,9 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`bg-sprite bg-no-repeat cursor-pointer ${
-        selected && "brightness-200"
+      className={`bg-sprite bg-no-repeat cursor-pointer hover:brightness-125 ${
+        (selected && "brightness-125 scale-105") ||
+        (isButton && "hover:scale-105")
       }`}
       style={{
         width: "50px",
@@ -69,7 +70,7 @@ const Card: React.FC<CardProps> = ({
           height: "100%",
         }}
       >
-        {cardNumber === 0 && probabilityOfFive > 0 && !fiveExcluded && (
+        {cardNumber === 0 && probabilityOfFive > 0 && (
           <span
             className="
          text-xs text-red-50 absolute -bottom-1 right-0 cursor-pointer"

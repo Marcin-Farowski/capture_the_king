@@ -6,15 +6,15 @@ import Card from "../Card";
 interface CardState {
   cardNumber: number;
   probabilityOfFive: number;
-  fiveExcluded: boolean;
   selected: boolean;
+  adjacentToFive: boolean;
 }
 
 const initialCardState: CardState = {
   cardNumber: 6,
   probabilityOfFive: 0,
-  fiveExcluded: false,
   selected: false,
+  adjacentToFive: false,
 };
 
 const Board: React.FC = () => {
@@ -26,8 +26,8 @@ const Board: React.FC = () => {
     col: number;
   } | null>(null);
 
-  const handleCardClick = (row: number, col: number) => {
-    const newBoardState = boardState.map((rowArray, rowIndex) =>
+  const handleCardSelection = (row: number, col: number) => {
+    const boardWithSelectedCard = boardState.map((rowArray, rowIndex) =>
       rowArray.map((card, colIndex) => {
         if (rowIndex === row && colIndex === col) {
           return {
@@ -43,40 +43,125 @@ const Board: React.FC = () => {
         return card;
       })
     );
-    setBoardState(newBoardState);
+    setBoardState(boardWithSelectedCard);
 
-    if (newBoardState[row][col].selected) {
+    if (boardWithSelectedCard[row][col].selected) {
       setSelectedCardPosition({ row, col });
     } else {
       setSelectedCardPosition(null);
     }
   };
 
-  const handleCardChangeClick = (cardNumber: number) => {
+  const handleCardChangeClick = (newCardNumber: number) => {
     if (selectedCardPosition !== null) {
       const { row, col } = selectedCardPosition;
-      const newBoardState = boardState.map((rowArray, rowIndex) =>
+      const boardWithNewCard = boardState.map((rowArray, rowIndex) =>
         rowArray.map((card, colIndex) => {
-          if (rowIndex === row && colIndex === col && cardNumber != 7) {
+          if (rowIndex === row && colIndex === col && newCardNumber !== 7) {
             return {
               ...card,
-              cardNumber: cardNumber === 7 ? cardNumber : cardNumber,
+              cardNumber: newCardNumber,
               probabilityOfFive: 0,
-              fiveExcluded: false,
-              selected: false,
             };
-          } else if (cardNumber === 7) {
+          }
+          if (rowIndex === row && colIndex === col && newCardNumber === 7) {
             return {
               ...card,
-              adjacentToFive: true,
+              adjacentToFive: !card.adjacentToFive,
             };
           }
           return card;
         })
       );
-      setBoardState(newBoardState);
-      setSelectedCardPosition(null);
+      setBoardState(boardWithNewCard);
+
+      const boardWithHiddenFives = showHiddenFives(boardWithNewCard);
+      setBoardState(boardWithHiddenFives);
     }
+  };
+
+  const showHiddenFives = (boardState: CardState[][]) => {
+    // Pierwszy przebieg: zmiana szarych piątek na nieodkryte karty czyli reset pól na których prawdopodobnie może znajdować się 5 przed nowymi ustaleniami
+    for (let row = 0; row < boardState.length; row++) {
+      for (let col = 0; col < boardState[row].length; col++) {
+        const currentCard = boardState[row][col];
+        if (currentCard.cardNumber === 7)
+          boardState[row][col] = {
+            ...currentCard,
+            cardNumber: 6,
+          };
+      }
+    }
+
+    // Drugi przebieg: zmiana kart sąsiadujących z kartami, które mają ustawioną flagę adjacentToFive
+    for (let row = 0; row < boardState.length; row++) {
+      for (let col = 0; col < boardState[row].length; col++) {
+        const currentCard = boardState[row][col];
+        if (currentCard.adjacentToFive) {
+          // Sprawdź sąsiadów karty
+          for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+              const newRow = row + i;
+              const newCol = col + j;
+              // Pomiń aktualnie wybraną kartę
+              if (i === 0 && j === 0) {
+                continue;
+              }
+              // Sprawdź czy nowe współrzędne są w granicach tablicy
+              if (
+                newRow >= 0 &&
+                newRow < boardState.length &&
+                newCol >= 0 &&
+                newCol < boardState[row].length
+              ) {
+                const adjacentCard = boardState[newRow][newCol];
+                // Jeśli sąsiadująca karta ma cardNumber równy 6, zmień go na 7
+                if (adjacentCard.cardNumber === 6) {
+                  boardState[newRow][newCol] = {
+                    ...adjacentCard,
+                    cardNumber: 7,
+                  };
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Trzeci przebieg: zmiana sąsiadujących kart z kartami o cardNumber <= 5, które nie mają flagi adjacentToFive
+    for (let row = 0; row < boardState.length; row++) {
+      for (let col = 0; col < boardState[row].length; col++) {
+        const currentCard = boardState[row][col];
+        if (currentCard.cardNumber <= 5 && !currentCard.adjacentToFive) {
+          // Sprawdź sąsiadów karty
+          for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+              const newRow = row + i;
+              const newCol = col + j;
+              // Sprawdź czy nowe współrzędne są w granicach tablicy
+              if (
+                newRow >= 0 &&
+                newRow < boardState.length &&
+                newCol >= 0 &&
+                newCol < boardState[row].length
+              ) {
+                const adjacentCard = boardState[newRow][newCol];
+                // Jeśli sąsiadująca karta ma cardNumber równy 7, zmień go na 6
+                if (adjacentCard.cardNumber === 7) {
+                  boardState[newRow][newCol] = {
+                    ...adjacentCard,
+                    cardNumber: 6,
+                  };
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return boardState;
   };
 
   return (
@@ -97,30 +182,26 @@ const Board: React.FC = () => {
         {boardState.map((row, rowIndex) =>
           row.map((card, colIndex) => (
             <Card
-              key={`${rowIndex}-${colIndex}`}
+              key={`${rowIndex}*${colIndex}`}
               cardNumber={card.cardNumber}
-              probabilityOfFive={0}
-              fiveExcluded={card.fiveExcluded}
               selected={card.selected}
-              adjacentToFive={false}
-              onClick={() => handleCardClick(rowIndex, colIndex)}
+              onClick={() => handleCardSelection(rowIndex, colIndex)}
             />
           ))
         )}
       </div>
-      <div>
-        {[...Array(8)].map((_, index) => (
-          <Card
-            key={index}
-            cardNumber={index}
-            probabilityOfFive={index}
-            fiveExcluded={false}
-            selected={false}
-            adjacentToFive={false}
-            onClick={() => handleCardChangeClick(index)}
-          />
-        ))}
-      </div>
+      {selectedCardPosition !== null && (
+        <div className="flex flex-wrap-reverse gap-1 w-96 justify-center">
+          {[...Array(8)].map((_, index) => (
+            <Card
+              key={index}
+              cardNumber={index}
+              isButton={true}
+              onClick={() => handleCardChangeClick(index)}
+            />
+          ))}
+        </div>
+      )}
     </>
   );
 };
