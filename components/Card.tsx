@@ -70,13 +70,13 @@ const Card: React.FC<CardProps> = ({
           height: "100%",
         }}
       >
-        {cardNumber === 0 && probabilityOfFive > 0 && (
+        {cardNumber === 7 && probabilityOfFive > 0 && (
           <span
             className="
          text-xs text-red-50 absolute -bottom-1 right-0 cursor-pointer"
             style={{ userSelect: "none" }}
           >
-            {probabilityOfFive * 100}%
+            {Math.round(probabilityOfFive * 1000) / 10}%
           </span>
         )}
       </div>
