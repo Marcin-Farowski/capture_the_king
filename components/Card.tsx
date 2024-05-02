@@ -1,6 +1,8 @@
 import React from "react";
 
 interface CardProps {
+  row?: number;
+  col?: number;
   cardNumber: number;
   probabilityOfFive?: number;
   selected?: boolean;
@@ -10,6 +12,8 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({
+  row = 0,
+  col = 0,
   cardNumber,
   probabilityOfFive = 0,
   selected = false,
