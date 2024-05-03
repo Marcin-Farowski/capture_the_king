@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Capture The King Assistant
+
+Capture The King Assistant is a web application built using Next.js. It assists players during their computerized card game of "Schwytaj Króla" (Capture The King) by memorizing revealed fields and analyzing areas where a card with the number five may appear. It then discards fields where this card cannot appear due to overlapping and non-overlapping fields, as well as the cards revealed so far. Additionally, it estimates the probability of a card with the number five appearing in the candidate fields.
+
+## Features
+
+- **Field Memorization**: The application remembers the fields revealed during the game.
+- **Card Analysis**: It analyzes the possible areas where a card with the number five can appear.
+- **Field Discarding**: Based on the analysis, it discards fields where the card with the number five cannot appear.
+- **Probability Estimation**: It estimates the likelihood of a card with the number five appearing in the candidate fields.
+
+## Access the Application
+
+The Capture The King Assistant application is available at [https://capture-the-king.vercel.app/](https://capture-the-king.vercel.app/).
 
 ## Getting Started
 
-First, run the development server:
+To get started with Capture The King Assistant, follow these steps:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Clone this repository to your local machine.
+2. Install dependencies using `npm install`.
+3. Run the development server using `npm run dev`.
+4. Open your web browser and navigate to `http://localhost:3000`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Start a new game of "Schwytaj Króla".
+2. As you reveal fields during the game, input them into the application to memorize.
+3. The application will analyze and suggest areas where the card with the number five might appear, along with the probability of its occurrence.
+4. Use this information to make strategic decisions during the game.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Contributing
 
-## Learn More
+Contributions are welcome! If you'd like to contribute to Capture The King Assistant, please fork the repository and submit a pull request with your changes.
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All Rights Reserved. This project is protected by copyright and prohibits copying, modifying, or distributing the source code without prior consent from the owner.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+For inquiries regarding the use of this software, please contact [Marcin Farowski](mailto:m.farowski@gmail.com).
