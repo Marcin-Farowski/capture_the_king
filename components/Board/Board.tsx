@@ -27,7 +27,7 @@ const Board: React.FC = () => {
     row: number;
     col: number;
   } | null>(null);
-  const [fivesRevealed, setFivesRevealed] = useState<boolean>(false);
+  const [fivesRevealed, setFivesRevealed] = useState<number>(0);
   const cardsAdjacentToFive: CardState[] = [];
 
   useEffect(() => {
@@ -73,10 +73,15 @@ const Board: React.FC = () => {
   };
 
   const handleCardChangeClick = (newCardNumber: number) => {
+    const changeFromFiveToOtherCardNumber: boolean | null = selectedCardPosition && boardState[selectedCardPosition.row][selectedCardPosition.col].cardNumber === 4 && newCardNumber !== 4;
     let fivesRevealedLocal = fivesRevealed;
     if (newCardNumber === 4) {
-      setFivesRevealed(true);
-      fivesRevealedLocal = true;
+      fivesRevealedLocal = fivesRevealed + 1;
+      setFivesRevealed(fivesRevealed + 1);
+    }
+    if (changeFromFiveToOtherCardNumber) {
+      fivesRevealedLocal = fivesRevealed - 1;
+      setFivesRevealed(fivesRevealed - 1);
     }
     if (selectedCardPosition !== null) {
       const { row, col } = selectedCardPosition;
@@ -413,7 +418,7 @@ const Board: React.FC = () => {
 
   const updateNumbersBasedOnNeighbors = (
     triplets: CardState[] | null,
-    fivesRevealed: boolean,
+    fivesRevealed: number,
     boardState: CardState[][]
   ): CardState[][] => {
     if (triplets === null) {
@@ -422,7 +427,7 @@ const Board: React.FC = () => {
 
     const cardsWithoutNeighbourFive: CardState[] = [];
 
-    if (fivesRevealed) {
+    if (fivesRevealed < 3) {
       triplets.forEach((triplet, index) => {
         // Szukanie kart z triplet, które nie mają najbliższego sąsiada z numerem 4
         if (!hasNeighborNumber(triplet, boardState, 4)) {
@@ -447,6 +452,15 @@ const Board: React.FC = () => {
           });
         });
       }
+    }
+    if (fivesRevealed === 3) {
+      boardState.forEach((row) => {
+        row.forEach((card) => {
+          if (card.cardNumber === 7) {
+            card.cardNumber = 6;
+          }
+        });
+      });
     }
 
     return boardState;
