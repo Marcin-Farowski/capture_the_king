@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useRef } from "react";
 import Card from "../Card";
 
 interface CardState {
@@ -22,15 +22,7 @@ const initialCardState: CardState = {
 };
 
 const Board: React.FC = () => {
-  const [boardState, setBoardState] = useState<CardState[][]>([]);
-  const [selectedCardPosition, setSelectedCardPosition] = useState<{
-    row: number;
-    col: number;
-  } | null>(null);
-  const [fivesRevealed, setFivesRevealed] = useState<number>(0);
-  const cardsAdjacentToFive: CardState[] = [];
-
-  useEffect(() => {
+  const [boardState, setBoardState] = useState(() => {
     const initialBoardState = Array(5)
       .fill([])
       .map((_, rowIndex) =>
@@ -43,45 +35,49 @@ const Board: React.FC = () => {
           }))
       );
 
-    setBoardState(initialBoardState);
-  }, []);
+    return initialBoardState;
+  });
+  const [selectedCardPosition, setSelectedCardPosition] = useState<{
+    row: number;
+    col: number;
+  } | null>(null);
+  const fivesRevealedRef = useRef<number>(0);
+  const cardsAdjacentToFive: CardState[] = [];
 
-  const handleCardSelection = (row: number, col: number) => {
-    const boardWithSelectedCard = boardState.map((rowArray, rowIndex) =>
-      rowArray.map((card, colIndex) => {
-        if (rowIndex === row && colIndex === col) {
+  const handleCardSelection = (selectedRow: number, selectedCol: number) => {
+    setBoardState((prevBoardState) => {
+      const updatedBoardState = prevBoardState.map((rowArray, rowIndex) =>
+        rowArray.map((card, colIndex) => {
+          const isSelected =
+            rowIndex === selectedRow && colIndex === selectedCol;
           return {
             ...card,
-            selected: !card.selected,
+            selected: isSelected ? !card.selected : false,
           };
-        } else if (card.selected) {
-          return {
-            ...card,
-            selected: false,
-          };
-        }
-        return card;
-      })
+        })
+      );
+
+      return updatedBoardState;
+    });
+
+    setSelectedCardPosition((prevPosition) =>
+      prevPosition?.row === selectedRow && prevPosition?.col === selectedCol
+        ? null
+        : { row: selectedRow, col: selectedCol }
     );
-    setBoardState(boardWithSelectedCard);
-
-    if (boardWithSelectedCard[row][col].selected) {
-      setSelectedCardPosition({ row, col });
-    } else {
-      setSelectedCardPosition(null);
-    }
   };
 
   const handleCardChangeClick = (newCardNumber: number) => {
-    const changeFromFiveToOtherCardNumber: boolean | null = selectedCardPosition && boardState[selectedCardPosition.row][selectedCardPosition.col].cardNumber === 4 && newCardNumber !== 4;
-    let fivesRevealedLocal = fivesRevealed;
+    const changeFromFiveToOtherCardNumber: boolean | null =
+      selectedCardPosition &&
+      boardState[selectedCardPosition.row][selectedCardPosition.col]
+        .cardNumber === 4 &&
+      newCardNumber !== 4;
     if (newCardNumber === 4) {
-      fivesRevealedLocal = fivesRevealed + 1;
-      setFivesRevealed(fivesRevealed + 1);
+      fivesRevealedRef.current += 1;
     }
     if (changeFromFiveToOtherCardNumber) {
-      fivesRevealedLocal = fivesRevealed - 1;
-      setFivesRevealed(fivesRevealed - 1);
+      fivesRevealedRef.current -= 1;
     }
     if (selectedCardPosition !== null) {
       const { row, col } = selectedCardPosition;
@@ -105,14 +101,11 @@ const Board: React.FC = () => {
           return card;
         })
       );
-      // setBoardState(boardWithNewCard);
 
       const boardWithHiddenFives = showHiddenFives(boardWithNewCard);
-      // setBoardState(boardWithHiddenFives);
 
       const boardWithFivesProbability =
         calculateProbabilityOfFive(boardWithHiddenFives);
-      // setBoardState(boardWithFivesProbability);
 
       const triplets = findTripletsWithoutCommonNeighbors(cardsAdjacentToFive);
       const tripletWithLeastAdjacentSevens = findTripletWithLeastAdjacentSevens(
@@ -122,10 +115,10 @@ const Board: React.FC = () => {
 
       const boardWithNumbersBasedOnNeighbors = updateNumbersBasedOnNeighbors(
         tripletWithLeastAdjacentSevens,
-        fivesRevealedLocal,
+        fivesRevealedRef.current,
         boardWithFivesProbability
       );
-      console.log("fivesRevealed: " + fivesRevealed);
+      console.log("fivesRevealedRef: " + fivesRevealedRef);
 
       setBoardState(boardWithNumbersBasedOnNeighbors);
     }
@@ -399,12 +392,12 @@ const Board: React.FC = () => {
     return count;
   };
 
-  // const updateNumbersBasedOnNeighbors = (triplets: CardState[] | null, fivesRevealed: number, boardState: CardState[][]): CardState[][] => {
+  // const updateNumbersBasedOnNeighbors = (triplets: CardState[] | null, fivesRevealedRef: number, boardState: CardState[][]): CardState[][] => {
   //   if (triplets === null) {
   //     return boardState;
   //   }
   //   const cardsWithoutNeighbourFive: CardState[];
-  //   if (fivesRevealed > 0) {
+  //   if (fivesRevealedRef > 0) {
   //     triplets.forEach((triplet, index) => {
   //       napisz w tym miejscu podwójną pętle która będzie sprawdzać najbliższe sąsiadujące karty w poszukiwaniu tych kart z triplet które nie mają najbliższego sąsiada karty o cardNumber===4
   //       jeśli znajdziesz taką to dodaj ją do tablicy cardsWithoutNeighbourFive
@@ -418,7 +411,7 @@ const Board: React.FC = () => {
 
   const updateNumbersBasedOnNeighbors = (
     triplets: CardState[] | null,
-    fivesRevealed: number,
+    fivesRevealedRef: number,
     boardState: CardState[][]
   ): CardState[][] => {
     if (triplets === null) {
@@ -427,7 +420,7 @@ const Board: React.FC = () => {
 
     const cardsWithoutNeighbourFive: CardState[] = [];
 
-    if (fivesRevealed < 3) {
+    if (fivesRevealedRef < 3) {
       triplets.forEach((triplet, index) => {
         // Szukanie kart z triplet, które nie mają najbliższego sąsiada z numerem 4
         if (!hasNeighborNumber(triplet, boardState, 4)) {
@@ -453,7 +446,7 @@ const Board: React.FC = () => {
         });
       }
     }
-    if (fivesRevealed === 3) {
+    if (fivesRevealedRef === 3) {
       boardState.forEach((row) => {
         row.forEach((card) => {
           if (card.cardNumber === 7) {
