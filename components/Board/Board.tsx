@@ -68,6 +68,29 @@ const Board: React.FC = () => {
   };
 
   const handleCardChangeClick = (newCardNumber: number) => {
+    const boardWithNewCard = updateBoardWithNewCard(newCardNumber);
+    const boardWithHiddenFives = showHiddenFives(boardWithNewCard);
+    const boardWithFivesProbability =
+      updateProbabilityOfFives(boardWithHiddenFives);
+    const triplets = findTripletsWithoutCommonNeighbors(cardsAdjacentToFive);
+    const tripletWithLeastAdjacentSevens = findTripletWithLeastAdjacentSevens(
+      triplets,
+      boardWithFivesProbability
+    );
+    const boardWithNumbersBasedOnNeighbors = updateNumbersBasedOnNeighbors(
+      tripletWithLeastAdjacentSevens,
+      fivesRevealedRef.current,
+      boardWithFivesProbability
+    );
+
+    setBoardState(boardWithNumbersBasedOnNeighbors);
+  };
+
+  const updateBoardWithNewCard = (newCardNumber: number): CardState[][] => {
+    if (!selectedCardPosition) {
+      return boardState;
+    }
+
     const changeFromFiveToOtherCardNumber: boolean | null =
       selectedCardPosition &&
       boardState[selectedCardPosition.row][selectedCardPosition.col]
@@ -79,49 +102,29 @@ const Board: React.FC = () => {
     if (changeFromFiveToOtherCardNumber) {
       fivesRevealedRef.current -= 1;
     }
-    if (selectedCardPosition !== null) {
-      const { row, col } = selectedCardPosition;
-      const boardWithNewCard = boardState.map((rowArray, rowIndex) =>
-        rowArray.map((card, colIndex) => {
-          if (rowIndex === row && colIndex === col) {
-            if (newCardNumber !== 7) {
-              return {
-                ...card,
-                cardNumber: newCardNumber,
-                probabilityOfFive: 0,
-              };
-            }
-            if (newCardNumber === 7) {
-              return {
-                ...card,
-                adjacentToFive: !card.adjacentToFive,
-              };
-            }
+
+    const { row, col } = selectedCardPosition;
+    let boardWithNewCard = boardState.map((rowArray, rowIndex) =>
+      rowArray.map((card, colIndex) => {
+        if (rowIndex === row && colIndex === col) {
+          if (newCardNumber !== 7) {
+            return {
+              ...card,
+              cardNumber: newCardNumber,
+              probabilityOfFive: 0,
+            };
           }
-          return card;
-        })
-      );
-
-      const boardWithHiddenFives = showHiddenFives(boardWithNewCard);
-
-      const boardWithFivesProbability =
-        calculateProbabilityOfFive(boardWithHiddenFives);
-
-      const triplets = findTripletsWithoutCommonNeighbors(cardsAdjacentToFive);
-      const tripletWithLeastAdjacentSevens = findTripletWithLeastAdjacentSevens(
-        triplets,
-        boardWithFivesProbability
-      );
-
-      const boardWithNumbersBasedOnNeighbors = updateNumbersBasedOnNeighbors(
-        tripletWithLeastAdjacentSevens,
-        fivesRevealedRef.current,
-        boardWithFivesProbability
-      );
-      console.log("fivesRevealedRef: " + fivesRevealedRef);
-
-      setBoardState(boardWithNumbersBasedOnNeighbors);
-    }
+          if (newCardNumber === 7) {
+            return {
+              ...card,
+              adjacentToFive: !card.adjacentToFive,
+            };
+          }
+        }
+        return card;
+      })
+    );
+    return boardWithNewCard;
   };
 
   const showHiddenFives = (boardState: CardState[][]) => {
@@ -210,7 +213,7 @@ const Board: React.FC = () => {
     return boardState;
   };
 
-  const calculateProbabilityOfFive = (boardState: CardState[][]) => {
+  const updateProbabilityOfFives = (boardState: CardState[][]) => {
     for (let row = 0; row < boardState.length; row++) {
       for (let col = 0; col < boardState[row].length; col++) {
         const currentCard = boardState[row][col];
@@ -391,23 +394,6 @@ const Board: React.FC = () => {
 
     return count;
   };
-
-  // const updateNumbersBasedOnNeighbors = (triplets: CardState[] | null, fivesRevealedRef: number, boardState: CardState[][]): CardState[][] => {
-  //   if (triplets === null) {
-  //     return boardState;
-  //   }
-  //   const cardsWithoutNeighbourFive: CardState[];
-  //   if (fivesRevealedRef > 0) {
-  //     triplets.forEach((triplet, index) => {
-  //       napisz w tym miejscu podwójną pętle która będzie sprawdzać najbliższe sąsiadujące karty w poszukiwaniu tych kart z triplet które nie mają najbliższego sąsiada karty o cardNumber===4
-  //       jeśli znajdziesz taką to dodaj ją do tablicy cardsWithoutNeighbourFive
-  //     });
-  //     tutaj jeśli cardsWithoutNeighbourFive posiada jakieś elementy to iteruj przez całą tablice boardState i zmieniaj cardNumber na cardNumber=6 kartom które spełniają następujące dwa warunki: - cardNumber===7
-  //     - karta ta nie ma jako najbliżeszgo sąsiada karty która jest w tablicy cardsWithoutNeighbourFive
-  //   }
-
-  //   tutaj zwróć nową zmodyfikowaną tablicę boardState
-  // };
 
   const updateNumbersBasedOnNeighbors = (
     triplets: CardState[] | null,
