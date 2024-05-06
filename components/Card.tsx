@@ -25,25 +25,25 @@ const Card: React.FC<CardProps> = ({
 
   switch (cardNumber) {
     case 0:
-      backgroundPosition = "0 0";
+      backgroundPosition = "-106px -78px";
       break;
     case 1:
-      backgroundPosition = "-53px 0";
+      backgroundPosition = "0 0";
       break;
     case 2:
-      backgroundPosition = "-106px 0";
+      backgroundPosition = "-53px 0";
       break;
     case 3:
-      backgroundPosition = "-159px 0";
+      backgroundPosition = "-106px 0";
       break;
     case 4:
-      backgroundPosition = "-212px 0";
+      backgroundPosition = "-159px 0";
       break;
     case 5:
-      backgroundPosition = "0 -78px";
+      backgroundPosition = "-212px 0";
       break;
     case 6:
-      backgroundPosition = "-106px -78px";
+      backgroundPosition = "0 -78px";
       break;
     case 7:
       backgroundPosition = "-212px -39px";

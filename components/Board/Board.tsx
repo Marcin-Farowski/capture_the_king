@@ -15,7 +15,7 @@ interface CardState {
 const initialCardState: CardState = {
   row: 0,
   col: 0,
-  cardNumber: 6,
+  cardNumber: 0,
   probabilityOfFive: 0,
   selected: false,
   adjacentToFive: false,
@@ -94,9 +94,9 @@ const Board: React.FC = () => {
     const changeFromFiveToOtherCardNumber: boolean | null =
       selectedCardPosition &&
       boardState[selectedCardPosition.row][selectedCardPosition.col]
-        .cardNumber === 4 &&
-      newCardNumber !== 4;
-    if (newCardNumber === 4) {
+        .cardNumber === 5 &&
+      newCardNumber !== 5;
+    if (newCardNumber === 5) {
       fivesRevealedRef.current += 1;
     }
     if (changeFromFiveToOtherCardNumber) {
@@ -135,7 +135,7 @@ const Board: React.FC = () => {
         if (currentCard.cardNumber === 7)
           boardState[row][col] = {
             ...currentCard,
-            cardNumber: 6,
+            cardNumber: 0,
             probabilityOfFive: 0,
           };
       }
@@ -165,7 +165,7 @@ const Board: React.FC = () => {
               ) {
                 const adjacentCard = boardState[newRow][newCol];
                 // Jeśli sąsiadująca karta ma cardNumber równy 6, zmień go na 7
-                if (adjacentCard.cardNumber === 6) {
+                if (adjacentCard.cardNumber === 0) {
                   boardState[newRow][newCol] = {
                     ...adjacentCard,
                     cardNumber: 7,
@@ -182,7 +182,11 @@ const Board: React.FC = () => {
     for (let row = 0; row < boardState.length; row++) {
       for (let col = 0; col < boardState[row].length; col++) {
         const currentCard = boardState[row][col];
-        if (currentCard.cardNumber <= 5 && !currentCard.adjacentToFive) {
+        if (
+          currentCard.cardNumber > 0 &&
+          currentCard.cardNumber <= 6 &&
+          !currentCard.adjacentToFive
+        ) {
           // Sprawdź sąsiadów karty
           for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
@@ -196,11 +200,11 @@ const Board: React.FC = () => {
                 newCol < boardState[row].length
               ) {
                 const adjacentCard = boardState[newRow][newCol];
-                // Jeśli sąsiadująca karta ma cardNumber równy 7, zmień go na 6
+                // Jeśli sąsiadująca karta ma cardNumber równy 7, zmień go na 0
                 if (adjacentCard.cardNumber === 7) {
                   boardState[newRow][newCol] = {
                     ...adjacentCard,
-                    cardNumber: 6,
+                    cardNumber: 0,
                   };
                 }
               }
@@ -232,10 +236,10 @@ const Board: React.FC = () => {
                 newCol < boardState[row].length
               ) {
                 const adjacentCard = boardState[newRow][newCol];
-                // Jeśli sąsiadująca karta ma cardNumber równy 7, zwiększ licznik
+                // Jeśli sąsiadująca karta ma cardNumber równy 7 lub 5, zwiększ licznik
                 if (
                   adjacentCard.cardNumber === 7 ||
-                  adjacentCard.cardNumber === 4
+                  adjacentCard.cardNumber === 5
                 ) {
                   countAdjacentSevens++;
                 }
@@ -309,16 +313,6 @@ const Board: React.FC = () => {
         `(${cards[0].row},${cards[0].col}) - (${cards[1].row},${cards[1].col}) - (${cards[2].row},${cards[2].col})`
       );
     });
-
-    // // Wypisz zawartość boardState
-    // console.log("Zawartość boardState:");
-    // boardState.forEach((row, rowIndex) => {
-    //   row.forEach((card, colIndex) => {
-    //     console.log(
-    //       `row: ${card.row}, col: ${card.col}, cardNumber: ${card.cardNumber}`
-    //     );
-    //   });
-    // });
 
     return tripletsWithoutCommonNeighbors;
   };
@@ -408,8 +402,8 @@ const Board: React.FC = () => {
 
     if (fivesRevealedRef < 3) {
       triplets.forEach((triplet, index) => {
-        // Szukanie kart z triplet, które nie mają najbliższego sąsiada z numerem 4
-        if (!hasNeighborNumber(triplet, boardState, 4)) {
+        // Szukanie kart z triplet, które nie mają najbliższego sąsiada z numerem 5
+        if (!hasNeighborNumber(triplet, boardState, 5)) {
           cardsWithoutNeighbourFive.push(triplet);
         }
       });
@@ -418,7 +412,7 @@ const Board: React.FC = () => {
           JSON.stringify(cardsWithoutNeighbourFive)
       );
 
-      // Zmiana numerów kart na 6, jeśli spełniają warunki
+      // Zmiana numerów kart na 0, jeśli spełniają warunki
       if (cardsWithoutNeighbourFive.length > 0) {
         boardState.forEach((row) => {
           row.forEach((card) => {
@@ -426,7 +420,7 @@ const Board: React.FC = () => {
               card.cardNumber === 7 &&
               !hasNeighborFromList(card, cardsWithoutNeighbourFive, boardState)
             ) {
-              card.cardNumber = 6;
+              card.cardNumber = 0;
             }
           });
         });
@@ -436,7 +430,7 @@ const Board: React.FC = () => {
       boardState.forEach((row) => {
         row.forEach((card) => {
           if (card.cardNumber === 7) {
-            card.cardNumber = 6;
+            card.cardNumber = 0;
           }
         });
       });
@@ -522,7 +516,7 @@ const Board: React.FC = () => {
           gridTemplateColumns: "repeat(5, 50px)",
           gridTemplateRows: "repeat(5, 36px)",
           gap: "1px",
-          width: "264px",
+          width: "265px",
           height: "220px",
           padding: "5px",
           backgroundPosition: "0 -117px",
