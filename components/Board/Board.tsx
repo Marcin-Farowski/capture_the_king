@@ -127,8 +127,9 @@ const Board: React.FC = () => {
     return boardWithNewCard;
   };
 
-  const showHiddenFives = (boardState: CardState[][]) => {
-    // Pierwszy przebieg: zmiana szarych piątek na nieodkryte karty czyli reset pól na których prawdopodobnie może znajdować się 5 przed nowymi ustaleniami
+  const resetPotentialFivesLocations = (
+    boardState: CardState[][]
+  ): CardState[][] => {
     for (let row = 0; row < boardState.length; row++) {
       for (let col = 0; col < boardState[row].length; col++) {
         const currentCard = boardState[row][col];
@@ -141,7 +142,10 @@ const Board: React.FC = () => {
       }
     }
 
-    // Drugi przebieg: zmiana kart sąsiadujących z kartami, które mają ustawioną flagę adjacentToFive
+    return boardState;
+  };
+
+  const addPotentialFives = (boardState: CardState[][]): CardState[][] => {
     for (let row = 0; row < boardState.length; row++) {
       for (let col = 0; col < boardState[row].length; col++) {
         const currentCard = boardState[row][col];
@@ -178,7 +182,12 @@ const Board: React.FC = () => {
       }
     }
 
-    // Trzeci przebieg: zmiana sąsiadujących kart z kartami o cardNumber <= 5, które nie mają flagi adjacentToFive
+    return boardState;
+  };
+
+  const removeExcludedPotentialFives = (
+    boardState: CardState[][]
+  ): CardState[][] => {
     for (let row = 0; row < boardState.length; row++) {
       for (let col = 0; col < boardState[row].length; col++) {
         const currentCard = boardState[row][col];
@@ -213,6 +222,19 @@ const Board: React.FC = () => {
         }
       }
     }
+
+    return boardState;
+  };
+
+  const showHiddenFives = (boardState: CardState[][]) => {
+    // Pierwszy przebieg: zmiana szarych piątek na nieodkryte karty czyli reset pól na których prawdopodobnie może znajdować się 5 przed nowymi ustaleniami
+    boardState = resetPotentialFivesLocations(boardState);
+
+    // Drugi przebieg: zmiana kart sąsiadujących z kartami, które mają ustawioną flagę adjacentToFive
+    boardState = addPotentialFives(boardState);
+
+    // Trzeci przebieg: zmiana sąsiadujących kart z kartami o cardNumber <= 5, które nie mają flagi adjacentToFive
+    boardState = removeExcludedPotentialFives(boardState);
 
     return boardState;
   };
