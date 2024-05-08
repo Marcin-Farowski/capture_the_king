@@ -239,42 +239,38 @@ const Board: React.FC = () => {
     return boardState;
   };
 
+  const getAdjacentSevensCount = (boardState: CardState[][], row: number, col: number): number => {
+    let countAdjacentSevens = 0;
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+        const newRow = row + i;
+        const newCol = col + j;
+        if (
+          newRow >= 0 &&
+          newRow < boardState.length &&
+          newCol >= 0 &&
+          newCol < boardState[row].length
+        ) {
+          const adjacentCard = boardState[newRow][newCol];
+          if (adjacentCard.cardNumber === 7 || adjacentCard.cardNumber === 5) {
+            countAdjacentSevens++;
+          }
+        }
+      }
+    }
+    return countAdjacentSevens;
+  };
+  
   const updateProbabilityOfFives = (boardState: CardState[][]) => {
     for (let row = 0; row < boardState.length; row++) {
       for (let col = 0; col < boardState[row].length; col++) {
         const currentCard = boardState[row][col];
         if (currentCard.adjacentToFive) {
-          let countAdjacentSevens = 0;
-          // Sprawdź sąsiadów karty
+          const countAdjacentSevens = getAdjacentSevensCount(boardState, row, col);
           for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
               const newRow = row + i;
               const newCol = col + j;
-              // Sprawdź czy nowe współrzędne są w granicach tablicy
-              if (
-                newRow >= 0 &&
-                newRow < boardState.length &&
-                newCol >= 0 &&
-                newCol < boardState[row].length
-              ) {
-                const adjacentCard = boardState[newRow][newCol];
-                // Jeśli sąsiadująca karta ma cardNumber równy 7 lub 5, zwiększ licznik
-                if (
-                  adjacentCard.cardNumber === 7 ||
-                  adjacentCard.cardNumber === 5
-                ) {
-                  countAdjacentSevens++;
-                }
-              }
-            }
-          }
-
-          // Dla każdej karty o cardNumber === 7 ustaw probabilityOfFive
-          for (let i = -1; i <= 1; i++) {
-            for (let j = -1; j <= 1; j++) {
-              const newRow = row + i;
-              const newCol = col + j;
-              // Sprawdź czy nowe współrzędne są w granicach tablicy
               if (
                 newRow >= 0 &&
                 newRow < boardState.length &&
@@ -283,13 +279,10 @@ const Board: React.FC = () => {
               ) {
                 const adjacentCard = boardState[newRow][newCol];
                 if (adjacentCard.cardNumber === 7) {
-                  const oldProbabilityOfFive =
-                    boardState[newRow][newCol].probabilityOfFive;
+                  const oldProbabilityOfFive = adjacentCard.probabilityOfFive;
                   const newProbabilityOfFive = 1 / countAdjacentSevens;
-                  // Ustaw probabilityOfFive dla każdej karty o cardNumber === 7
                   if (newProbabilityOfFive > oldProbabilityOfFive) {
-                    boardState[newRow][newCol].probabilityOfFive =
-                      newProbabilityOfFive;
+                    adjacentCard.probabilityOfFive = newProbabilityOfFive;
                   }
                 }
               }
@@ -299,7 +292,7 @@ const Board: React.FC = () => {
       }
     }
     return boardState;
-  };
+  };  
 
   const findTripletsWithoutCommonNeighbors = (
     cardsAdjacentToFive: CardState[]
@@ -448,7 +441,7 @@ const Board: React.FC = () => {
         });
       }
     }
-    if (fivesRevealedRef === 3) {
+    if (fivesRevealedRef >= 3) {
       boardState.forEach((row) => {
         row.forEach((card) => {
           if (card.cardNumber === 7) {
