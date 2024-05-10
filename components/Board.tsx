@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import Card from "../Card";
+import Card from "./Card";
 
 interface CardState {
   row: number;
@@ -82,7 +82,7 @@ const Board: React.FC = () => {
       boardWithHiddenFives
     );
 
-    const boardWithExcludedAdjacentFivesCards = findExcludedAdjacentFivesCards(boardWithNumbersBasedOnNeighbors, tripletWithLeastAdjacentPotentialFives);
+    const boardWithExcludedAdjacentFivesCards = removePotentialFivesNotCommonToTwoSets(boardWithNumbersBasedOnNeighbors, tripletWithLeastAdjacentPotentialFives);
 
     const boardWithFivesProbability =
       updateProbabilityOfFives(boardWithExcludedAdjacentFivesCards);
@@ -325,14 +325,6 @@ const Board: React.FC = () => {
       }
     }
 
-    // Wyświetl znalezione trójki kart
-    console.log("Trójki kart bez wspólnych sąsiadów:");
-    tripletsWithoutCommonNeighbors.forEach((cards) => {
-      console.log(
-        `(${cards[0].row},${cards[0].col}) - (${cards[1].row},${cards[1].col}) - (${cards[2].row},${cards[2].col})`
-      );
-    });
-
     return tripletsWithoutCommonNeighbors;
   };
 
@@ -356,18 +348,11 @@ const Board: React.FC = () => {
     for (let i = 0; i < triplets.length; i++) {
       const currentTriplet = triplets[i];
       const adjacentSevens = countAdjacentPotentialFives(currentTriplet, boardState);
-      console.log(`Triplet ${i}: Adjacent Sevens: ${adjacentSevens}`);
       if (adjacentSevens < minAdjacentSevens) {
         minAdjacentSevens = adjacentSevens;
         tripletWithLeastAdjacentPotentialFives = currentTriplet;
       }
     }
-
-    console.log(
-      `Triplet with least adjacent sevens: ${JSON.stringify(
-        tripletWithLeastAdjacentPotentialFives
-      )}`
-    );
 
     return tripletWithLeastAdjacentPotentialFives;
   };
@@ -394,7 +379,6 @@ const Board: React.FC = () => {
               const adjacentCard = boardState[newRow][newCol];
               // Jeśli sąsiadująca karta ma cardNumber równy 7, zwiększ licznik
               if (adjacentCard.cardNumber === 7) {
-                console.log(`petla ${JSON.stringify(card)}`);
                 count++;
               }
             }
@@ -402,8 +386,6 @@ const Board: React.FC = () => {
         }
       }
     }
-
-    console.log("count:" + count);
 
     return count;
   };
@@ -426,10 +408,6 @@ const Board: React.FC = () => {
           cardsWithoutNeighbourFive.push(triplet);
         }
       });
-      console.log(
-        "cards without neighbor five: " +
-          JSON.stringify(cardsWithoutNeighbourFive)
-      );
 
       // Zmiana numerów kart na 0, jeśli spełniają warunki
       if (cardsWithoutNeighbourFive.length > 0) {
@@ -525,7 +503,7 @@ const Board: React.FC = () => {
     return false;
   };
 
-  const findExcludedAdjacentFivesCards = (
+  const removePotentialFivesNotCommonToTwoSets = (
     boardState: CardState[][],
     tripletWithLeastAdjacentPotentialFives: CardState[] | null
   ): CardState[][] => {
@@ -581,22 +559,16 @@ const Board: React.FC = () => {
             excludedAdjacentFivesCards.push(currentCard);
             const iterator = cardsFromTriplet.values();
             const firstElementFromTriplet = iterator.next().value;
-            boardState = updateNeighborCards(firstElementFromTriplet, currentCard, boardState);
+            boardState = removePotentialFivesNotCommonToTwoCards(firstElementFromTriplet, currentCard, boardState);
           }
         }
       }
     }
   
-    // Wypisanie znalezionych kart
-    console.log("Znalezione karty:");
-    excludedAdjacentFivesCards.forEach((card) => {
-      console.log(`(${card.row}, ${card.col})`);
-    });
-  
     return boardState;
   };
 
-  const updateNeighborCards = (
+  const removePotentialFivesNotCommonToTwoCards = (
     card1: CardState,
     card2: CardState,
     boardState: CardState[][]
@@ -631,13 +603,6 @@ const Board: React.FC = () => {
   
     return boardState;
   };
-  
-  
-  
-  
-  
-  
-  
 
   return (
     <>
