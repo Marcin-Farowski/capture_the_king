@@ -8,7 +8,7 @@ interface CardState {
   col: number;
   cardNumber: number;
   probabilityOfFive: number;
-  selected: boolean;
+  isSelected: boolean;
   adjacentToFive: boolean;
 }
 
@@ -17,7 +17,7 @@ const initialCardState: CardState = {
   col: 0,
   cardNumber: 0,
   probabilityOfFive: 0,
-  selected: false,
+  isSelected: false,
   adjacentToFive: false,
 };
 
@@ -43,6 +43,7 @@ const Board: React.FC = () => {
   } | null>(null);
   const fivesRevealedRef = useRef<number>(0);
   const cardsAdjacentToFive: CardState[] = [];
+  const usedCardsQuantityRef = useRef<number[]>(Array.from({ length: 8 }, () => 0));
 
   const handleCardSelection = (selectedRow: number, selectedCol: number) => {
     setBoardState((prevBoardState) => {
@@ -52,7 +53,7 @@ const Board: React.FC = () => {
             rowIndex === selectedRow && colIndex === selectedCol;
           return {
             ...card,
-            selected: isSelected ? !card.selected : false,
+            isSelected: isSelected ? !card.isSelected : false,
           };
         })
       );
@@ -84,9 +85,10 @@ const Board: React.FC = () => {
 
     const boardWithExcludedAdjacentFivesCards = removePotentialFivesNotCommonToTwoSets(boardWithNumbersBasedOnNeighbors, tripletWithLeastAdjacentPotentialFives);
 
-    const boardWithFivesProbability =
-      updateProbabilityOfFives(boardWithExcludedAdjacentFivesCards);
+    const boardWithFivesProbability = updateProbabilityOfFives(boardWithExcludedAdjacentFivesCards);
 
+    countUsedCards(boardWithFivesProbability, usedCardsQuantityRef);
+      
     setBoardState(boardWithFivesProbability);
   };
 
@@ -256,7 +258,7 @@ const Board: React.FC = () => {
           newCol < boardState[row].length
         ) {
           const adjacentCard = boardState[newRow][newCol];
-          if (adjacentCard.cardNumber === 7 || adjacentCard.cardNumber === 5) {
+          if (adjacentCard.cardNumber === 7) {
             countAdjacentPotentialFives++;
           }
         }
@@ -604,6 +606,22 @@ const Board: React.FC = () => {
     return boardState;
   };
 
+  const countUsedCards = (boardState: CardState[][], usedCardsQuantityRef: React.MutableRefObject<number[]>) => {
+    // Zainicjuj tablicę wynikową zerami
+    const counts: number[] = Array.from({ length: 8 }, () => 0);
+
+    // Przejdź przez każdą kartę w tablicy boardState
+    boardState.forEach(row => {
+        row.forEach(card => {
+            // Zwiększ licznik dla danej karty
+            counts[card.cardNumber]++;
+        });
+    });
+
+    // Zaktualizuj wartości w tablicy usedCardsQuantityRef
+    usedCardsQuantityRef.current = counts;
+};
+
   return (
     <>
       <div
@@ -626,7 +644,7 @@ const Board: React.FC = () => {
               row={rowIndex}
               col={colIndex}
               cardNumber={card.cardNumber}
-              selected={card.selected}
+              isSelected={card.isSelected}
               probabilityOfFive={card.probabilityOfFive}
               onClick={() => handleCardSelection(rowIndex, colIndex)}
             />
@@ -640,6 +658,7 @@ const Board: React.FC = () => {
               key={index}
               cardNumber={index}
               isButton={true}
+              usedCards={usedCardsQuantityRef.current[index]}
               onClick={() => handleCardChangeClick(index)}
             />
           ))}

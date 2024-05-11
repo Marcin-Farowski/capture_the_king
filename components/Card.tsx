@@ -5,9 +5,10 @@ interface CardProps {
   col?: number;
   cardNumber: number;
   probabilityOfFive?: number;
-  selected?: boolean;
+  isSelected?: boolean;
   adjacentToFive?: boolean;
   isButton?: boolean;
+  usedCards?: number;
   onClick: () => void;
 }
 
@@ -16,12 +17,14 @@ const Card: React.FC<CardProps> = ({
   col = 0,
   cardNumber,
   probabilityOfFive = 0,
-  selected = false,
+  isSelected = false,
   adjacentToFive = false,
   isButton = false,
+  usedCards = 0,
   onClick,
 }) => {
   let backgroundPosition = "";
+  let maxCardQuantity = 0;
 
   switch (cardNumber) {
     case 0:
@@ -52,10 +55,35 @@ const Card: React.FC<CardProps> = ({
       backgroundPosition = "-106px -78px";
   }
 
+  if (isButton) {
+    switch (cardNumber) {
+      case 1:
+        maxCardQuantity = 7;
+        break;
+        case 2:
+        maxCardQuantity = 4;
+        break;
+        case 3:
+        maxCardQuantity = 5;
+        break;
+        case 4:
+        maxCardQuantity = 5;
+        break;
+        case 5:
+        maxCardQuantity = 3;
+        break;
+        case 6:
+        maxCardQuantity = 1;
+        break;
+      default:
+        maxCardQuantity = 0;
+    }
+  }
+
   return (
     <div
       className={`bg-sprite bg-no-repeat cursor-pointer hover:brightness-125 ${
-        (selected && "brightness-125 scale-105") ||
+        (isSelected && "brightness-125 scale-105") ||
         (isButton && "hover:scale-105")
       }`}
       style={{
@@ -81,6 +109,15 @@ const Card: React.FC<CardProps> = ({
             style={{ userSelect: "none" }}
           >
             {Math.round(probabilityOfFive * 1000) / 10}%
+          </span>
+        )}
+        {maxCardQuantity > 0 && (
+          <span
+            className="
+         text-xs text-red-50 bg-zinc-950/50 rounded absolute -bottom-1 right-0 px-1 cursor-pointer"
+            style={{ userSelect: "none" }}
+          >
+            {usedCards}/{maxCardQuantity}
           </span>
         )}
       </div>
