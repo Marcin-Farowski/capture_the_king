@@ -68,7 +68,10 @@ const Board: React.FC = () => {
     );
   };
 
-  const handleCardChangeClick = (newCardNumber: number) => {
+  const handleCardChangeClick = (newCardNumber: number, usedCardsQuantity: number, maxCardQuantity: number) => {
+    if (usedCardsQuantity > 0 && maxCardQuantity === usedCardsQuantity) {
+      return;
+    }
     const boardWithNewCard = updateBoardWithNewCard(newCardNumber);
     const boardWithHiddenFives = showHiddenFives(boardWithNewCard);
     
@@ -659,7 +662,7 @@ const Board: React.FC = () => {
               cardNumber={index}
               isButton={true}
               usedCards={usedCardsQuantityRef.current[index]}
-              onClick={() => handleCardChangeClick(index)}
+              onClick={(cardNumber, usedCards, maxCardQuantity) => handleCardChangeClick(cardNumber, usedCards, maxCardQuantity)}
             />
           ))}
         </div>

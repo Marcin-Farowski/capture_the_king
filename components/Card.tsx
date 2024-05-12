@@ -9,7 +9,7 @@ interface CardProps {
   adjacentToFive?: boolean;
   isButton?: boolean;
   usedCards?: number;
-  onClick: () => void;
+  onClick: (cardNumber: number, usedCards: number, maxCardQuantity: number) => void;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -25,6 +25,8 @@ const Card: React.FC<CardProps> = ({
 }) => {
   let backgroundPosition = "";
   let maxCardQuantity = 0;
+  let buttonWithCardLimit = false;
+  let allCardsUsed = false;
 
   switch (cardNumber) {
     case 0:
@@ -78,13 +80,21 @@ const Card: React.FC<CardProps> = ({
       default:
         maxCardQuantity = 0;
     }
+    if (maxCardQuantity > 0) {
+      buttonWithCardLimit = true;
+      if (usedCards === maxCardQuantity) {
+        allCardsUsed = true;
+      }
+    }
   }
 
   return (
     <div
-      className={`bg-sprite bg-no-repeat cursor-pointer hover:brightness-125 ${
-        (isSelected && "brightness-125 scale-105") ||
-        (isButton && "hover:scale-105")
+      className={`bg-sprite bg-no-repeat cursor-pointer
+        ${(isSelected && "brightness-125 scale-105")}
+        ${(isButton && !allCardsUsed && "hover:scale-105")}
+        ${(allCardsUsed && "saturate-0 cursor-not-allowed")}
+        ${(!allCardsUsed && "hover:brightness-125")}
       }`}
       style={{
         width: "50px",
@@ -93,7 +103,7 @@ const Card: React.FC<CardProps> = ({
         overflow: "hidden",
         backgroundPosition,
       }}
-      onClick={onClick}
+      onClick={() => onClick(cardNumber, usedCards, maxCardQuantity)}
     >
       <div
         className="bg-cover"
@@ -111,10 +121,10 @@ const Card: React.FC<CardProps> = ({
             {Math.round(probabilityOfFive * 1000) / 10}%
           </span>
         )}
-        {maxCardQuantity > 0 && (
+        {buttonWithCardLimit && (
           <span
-            className="
-         text-xs text-red-50 bg-zinc-950/50 rounded absolute -bottom-1 right-0 px-1 cursor-pointer"
+            className={`text-xs text-red-50 bg-zinc-950/50 rounded absolute -bottom-1 right-0 px-1 cursor-pointer
+              ${(allCardsUsed && "saturate-0 cursor-not-allowed")}`}
             style={{ userSelect: "none" }}
           >
             {usedCards}/{maxCardQuantity}
