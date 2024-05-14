@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import Image from "next/image";
+import boardImg from "../public/assets/board.png";
 import Card from "./Card";
 
 interface CardState {
@@ -43,7 +45,9 @@ const Board: React.FC = () => {
   } | null>(null);
   const fivesRevealedRef = useRef<number>(0);
   const cardsAdjacentToFive: CardState[] = [];
-  const usedCardsQuantityRef = useRef<number[]>(Array.from({ length: 8 }, () => 0));
+  const usedCardsQuantityRef = useRef<number[]>(
+    Array.from({ length: 8 }, () => 0)
+  );
 
   const handleCardSelection = (selectedRow: number, selectedCol: number) => {
     setBoardState((prevBoardState) => {
@@ -68,30 +72,41 @@ const Board: React.FC = () => {
     );
   };
 
-  const handleCardChangeClick = (newCardNumber: number, usedCardsQuantity: number, maxCardQuantity: number) => {
+  const handleCardChangeClick = (
+    newCardNumber: number,
+    usedCardsQuantity: number,
+    maxCardQuantity: number
+  ) => {
     if (usedCardsQuantity > 0 && maxCardQuantity === usedCardsQuantity) {
       return;
     }
     const boardWithNewCard = updateBoardWithNewCard(newCardNumber);
     const boardWithHiddenFives = showHiddenFives(boardWithNewCard);
-    
+
     const triplets = findTripletsWithoutCommonNeighbors(cardsAdjacentToFive);
-    const tripletWithLeastAdjacentPotentialFives = findTripletWithLeastAdjacentPotentialFives(
-      triplets,
-      boardWithHiddenFives
-    );
+    const tripletWithLeastAdjacentPotentialFives =
+      findTripletWithLeastAdjacentPotentialFives(
+        triplets,
+        boardWithHiddenFives
+      );
     const boardWithNumbersBasedOnNeighbors = updateNumbersBasedOnNeighbors(
       tripletWithLeastAdjacentPotentialFives,
       fivesRevealedRef.current,
       boardWithHiddenFives
     );
 
-    const boardWithExcludedAdjacentFivesCards = removePotentialFivesNotCommonToTwoSets(boardWithNumbersBasedOnNeighbors, tripletWithLeastAdjacentPotentialFives);
+    const boardWithExcludedAdjacentFivesCards =
+      removePotentialFivesNotCommonToTwoSets(
+        boardWithNumbersBasedOnNeighbors,
+        tripletWithLeastAdjacentPotentialFives
+      );
 
-    const boardWithFivesProbability = updateProbabilityOfFives(boardWithExcludedAdjacentFivesCards);
+    const boardWithFivesProbability = updateProbabilityOfFives(
+      boardWithExcludedAdjacentFivesCards
+    );
 
     countUsedCards(boardWithFivesProbability, usedCardsQuantityRef);
-      
+
     setBoardState(boardWithFivesProbability);
   };
 
@@ -248,7 +263,11 @@ const Board: React.FC = () => {
     return boardState;
   };
 
-  const getAdjacentPotentialFivesCount = (boardState: CardState[][], row: number, col: number): number => {
+  const getAdjacentPotentialFivesCount = (
+    boardState: CardState[][],
+    row: number,
+    col: number
+  ): number => {
     let countAdjacentPotentialFives = 0;
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
@@ -269,13 +288,17 @@ const Board: React.FC = () => {
     }
     return countAdjacentPotentialFives;
   };
-  
+
   const updateProbabilityOfFives = (boardState: CardState[][]) => {
     for (let row = 0; row < boardState.length; row++) {
       for (let col = 0; col < boardState[row].length; col++) {
         const currentCard = boardState[row][col];
         if (currentCard.adjacentToFive) {
-          const countAdjacentPotentialFives = getAdjacentPotentialFivesCount(boardState, row, col);
+          const countAdjacentPotentialFives = getAdjacentPotentialFivesCount(
+            boardState,
+            row,
+            col
+          );
           for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
               const newRow = row + i;
@@ -301,7 +324,7 @@ const Board: React.FC = () => {
       }
     }
     return boardState;
-  };  
+  };
 
   const findTripletsWithoutCommonNeighbors = (
     cardsAdjacentToFive: CardState[]
@@ -348,11 +371,17 @@ const Board: React.FC = () => {
     if (triplets.length === 0) return null;
 
     let tripletWithLeastAdjacentPotentialFives: CardState[] = triplets[0];
-    let minAdjacentSevens = countAdjacentPotentialFives(triplets[0], boardState);
+    let minAdjacentSevens = countAdjacentPotentialFives(
+      triplets[0],
+      boardState
+    );
 
     for (let i = 0; i < triplets.length; i++) {
       const currentTriplet = triplets[i];
-      const adjacentSevens = countAdjacentPotentialFives(currentTriplet, boardState);
+      const adjacentSevens = countAdjacentPotentialFives(
+        currentTriplet,
+        boardState
+      );
       if (adjacentSevens < minAdjacentSevens) {
         minAdjacentSevens = adjacentSevens;
         tripletWithLeastAdjacentPotentialFives = currentTriplet;
@@ -517,27 +546,30 @@ const Board: React.FC = () => {
     if (!tripletWithLeastAdjacentPotentialFives) {
       return boardState;
     }
-  
+
     // Przejście przez planszę
     for (let row = 0; row < boardState.length; row++) {
       for (let col = 0; col < boardState[row].length; col++) {
         const currentCard = boardState[row][col];
-  
+
         // Sprawdzenie czy karta ma flagę adjacentToFive ustawioną na true
-        if (currentCard.adjacentToFive && !tripletWithLeastAdjacentPotentialFives.includes(currentCard)) {
+        if (
+          currentCard.adjacentToFive &&
+          !tripletWithLeastAdjacentPotentialFives.includes(currentCard)
+        ) {
           const cardsFromTriplet = new Set<CardState>();
-  
+
           // Przejście przez sąsiadujące karty
           for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
               const newRow = row + i;
               const newCol = col + j;
-  
+
               // Pominięcie aktualnej karty
               if (i === 0 && j === 0) {
                 continue;
               }
-  
+
               // Sprawdzenie czy sąsiadująca karta mieści się w granicach planszy
               if (
                 newRow >= 0 &&
@@ -546,30 +578,36 @@ const Board: React.FC = () => {
                 newCol < boardState[0].length
               ) {
                 const adjacentCard = boardState[newRow][newCol];
-  
-                // Sprawdzenie czy sąsiednia karta ma sąsiada z którąś z kart z tripletWithLeastAdjacentPotentialFives
-                  tripletWithLeastAdjacentPotentialFives.forEach((adjacentToFiveCard) => {
-                    if (
-                    hasNeighbor(adjacentCard, adjacentToFiveCard, boardState)) {
 
+                // Sprawdzenie czy sąsiednia karta ma sąsiada z którąś z kart z tripletWithLeastAdjacentPotentialFives
+                tripletWithLeastAdjacentPotentialFives.forEach(
+                  (adjacentToFiveCard) => {
+                    if (
+                      hasNeighbor(adjacentCard, adjacentToFiveCard, boardState)
+                    ) {
                       cardsFromTriplet.add(adjacentToFiveCard);
                     }
-                  })
+                  }
+                );
               }
             }
           }
-  
+
           // Sprawdzenie czy sąsiadujące karty tworzą zbiór, który zawiera elementy z tylko jednego z trzech zbiorów
           if (cardsFromTriplet.size === 1) {
             excludedAdjacentFivesCards.push(currentCard);
             const iterator = cardsFromTriplet.values();
             const firstElementFromTriplet = iterator.next().value;
-            boardState = removePotentialFivesNotCommonToTwoCards(firstElementFromTriplet, currentCard, boardState);
+            boardState = removePotentialFivesNotCommonToTwoCards(
+              firstElementFromTriplet,
+              currentCard,
+              boardState
+            );
           }
         }
       }
     }
-  
+
     return boardState;
   };
 
@@ -577,12 +615,12 @@ const Board: React.FC = () => {
     card1: CardState,
     card2: CardState,
     boardState: CardState[][]
-  ): CardState[][] => {  
+  ): CardState[][] => {
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
         const newRow = card1.row + i;
-        const newCol = card1.col + j; 
-          
+        const newCol = card1.col + j;
+
         // Pominięcie aktualnej karty
         if (i === 0 && j === 0) {
           continue;
@@ -597,62 +635,73 @@ const Board: React.FC = () => {
         ) {
           const adjacentCard = boardState[newRow][newCol];
 
-        if (!hasNeighbor(adjacentCard, card2, boardState)) {
-          if (adjacentCard.cardNumber === 7) {
-            adjacentCard.cardNumber = 0;
+          if (!hasNeighbor(adjacentCard, card2, boardState)) {
+            if (adjacentCard.cardNumber === 7) {
+              adjacentCard.cardNumber = 0;
+            }
           }
         }
       }
     }
-  }
-  
+
     return boardState;
   };
 
-  const countUsedCards = (boardState: CardState[][], usedCardsQuantityRef: React.MutableRefObject<number[]>) => {
+  const countUsedCards = (
+    boardState: CardState[][],
+    usedCardsQuantityRef: React.MutableRefObject<number[]>
+  ) => {
     // Zainicjuj tablicę wynikową zerami
     const counts: number[] = Array.from({ length: 8 }, () => 0);
 
     // Przejdź przez każdą kartę w tablicy boardState
-    boardState.forEach(row => {
-        row.forEach(card => {
-            // Zwiększ licznik dla danej karty
-            counts[card.cardNumber]++;
-        });
+    boardState.forEach((row) => {
+      row.forEach((card) => {
+        // Zwiększ licznik dla danej karty
+        counts[card.cardNumber]++;
+      });
     });
 
     // Zaktualizuj wartości w tablicy usedCardsQuantityRef
     usedCardsQuantityRef.current = counts;
-};
+  };
 
   return (
     <>
-      <div
-        className="bg-sprite bg-no-repeat"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 50px)",
-          gridTemplateRows: "repeat(5, 36px)",
-          gap: "1px",
-          width: "265px",
-          height: "220px",
-          padding: "5px",
-          backgroundPosition: "0 -117px",
-        }}
-      >
-        {boardState.map((row, rowIndex) =>
-          row.map((card, colIndex) => (
-            <Card
-              key={`${rowIndex}*${colIndex}`}
-              row={rowIndex}
-              col={colIndex}
-              cardNumber={card.cardNumber}
-              isSelected={card.isSelected}
-              probabilityOfFive={card.probabilityOfFive}
-              onClick={() => handleCardSelection(rowIndex, colIndex)}
-            />
-          ))
-        )}
+      <div>
+        <Image
+          src={boardImg}
+          alt="Board image"
+          width={265}
+          height={220}
+          style={{ position: "absolute" }}
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 50px)",
+            gridTemplateRows: "repeat(5, 36px)",
+            gap: "1px",
+            width: "265px",
+            height: "220px",
+            padding: "5px",
+            backgroundPosition: "0 -117px",
+          }}
+        >
+          {boardState.map((row, rowIndex) =>
+            row.map((card, colIndex) => (
+              <Card
+                key={`${rowIndex}*${colIndex}`}
+                row={rowIndex}
+                col={colIndex}
+                cardNumber={card.cardNumber}
+                isSelected={card.isSelected}
+                probabilityOfFive={card.probabilityOfFive}
+                onClick={() => handleCardSelection(rowIndex, colIndex)}
+              />
+            ))
+          )}
+        </div>
       </div>
       {selectedCardPosition !== null && (
         <div className="flex flex-wrap-reverse gap-1 w-96 justify-center">
@@ -662,7 +711,9 @@ const Board: React.FC = () => {
               cardNumber={index}
               isButton={true}
               usedCards={usedCardsQuantityRef.current[index]}
-              onClick={(cardNumber, usedCards, maxCardQuantity) => handleCardChangeClick(cardNumber, usedCards, maxCardQuantity)}
+              onClick={(cardNumber, usedCards, maxCardQuantity) =>
+                handleCardChangeClick(cardNumber, usedCards, maxCardQuantity)
+              }
             />
           ))}
         </div>
