@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import Image from "next/image";
-import boardImg from "../public/assets/board.png";
 import Card from "./Card";
 
 interface CardState {
@@ -668,29 +666,20 @@ const Board: React.FC = () => {
 
   return (
     <>
-      <div>
-        <Image
-          src={boardImg}
-          alt="Board image"
-          width={265}
-          height={220}
-          style={{ position: "absolute" }}
-        />
-        <div className="grid grid-cols-5 grid-rows-[repeat(5,_36px)] gap-px p-[5px] mb-10">
-          {boardState.map((row, rowIndex) =>
-            row.map((card, colIndex) => (
-              <Card
-                key={`${rowIndex}*${colIndex}`}
-                row={rowIndex}
-                col={colIndex}
-                cardNumber={card.cardNumber}
-                isSelected={card.isSelected}
-                probabilityOfFive={card.probabilityOfFive}
-                onClick={() => handleCardSelection(rowIndex, colIndex)}
-              />
-            ))
-          )}
-        </div>
+      <div className="bg-sprite bg-no-repeat bg-[0_-117px] grid grid-cols-5 grid-rows-[repeat(5,_36)] gap-px p-[5px] mb-10">
+        {boardState.map((row, rowIndex) =>
+          row.map((card, colIndex) => (
+            <Card
+              key={`${rowIndex}*${colIndex}`}
+              row={rowIndex}
+              col={colIndex}
+              cardNumber={card.cardNumber}
+              isSelected={card.isSelected}
+              probabilityOfFive={card.probabilityOfFive}
+              onClick={() => handleCardSelection(rowIndex, colIndex)}
+            />
+          ))
+        )}
       </div>
       {selectedCardPosition !== null && (
         <div className="flex flex-wrap-reverse gap-1 w-96 justify-center">

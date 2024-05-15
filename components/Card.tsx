@@ -1,35 +1,4 @@
 import React from "react";
-import Image, { StaticImageData } from "next/image";
-import oneImg from "../public/assets/one.png";
-import twoImg from "../public/assets/two.png";
-import threeImg from "../public/assets/three.png";
-import fourImg from "../public/assets/four.png";
-import fiveImg from "../public/assets/five.png";
-import kingImg from "../public/assets/king.png";
-import faceDownCardImg from "../public/assets/face-down-card.png";
-import grayOneImg from "../public/assets/gray-one.png";
-import grayTwoImg from "../public/assets/gray-two.png";
-import grayThreeImg from "../public/assets/gray-three.png";
-import grayFourImg from "../public/assets/gray-four.png";
-import grayFiveImg from "../public/assets/gray-five.png";
-import grayKingImg from "../public/assets/gray-king.png";
-
-// Preload images
-const preloadedImages = [
-  oneImg,
-  twoImg,
-  threeImg,
-  fourImg,
-  fiveImg,
-  kingImg,
-  faceDownCardImg,
-  grayOneImg,
-  grayTwoImg,
-  grayThreeImg,
-  grayFourImg,
-  grayFiveImg,
-  grayKingImg,
-];
 
 interface CardProps {
   row?: number;
@@ -58,45 +27,45 @@ const Card: React.FC<CardProps> = ({
   usedCards = 0,
   onClick,
 }) => {
-  let imgSrc: StaticImageData;
+  let backgroundPosition = "";
+  let grayCardBackgroundPosition = "";
   let maxCardQuantity = 0;
   let buttonWithCardLimit = false;
   let allCardsUsed = false;
-  let allCardsUsedImgSrc: StaticImageData = faceDownCardImg;
 
   switch (cardNumber) {
     case 0:
-      imgSrc = faceDownCardImg;
+      backgroundPosition = "-106px -78px";
       break;
     case 1:
-      imgSrc = oneImg;
-      allCardsUsedImgSrc = grayOneImg;
+      backgroundPosition = "0 0";
+      grayCardBackgroundPosition = "0 -39px";
       break;
     case 2:
-      imgSrc = twoImg;
-      allCardsUsedImgSrc = grayTwoImg;
+      backgroundPosition = "-53px 0";
+      grayCardBackgroundPosition = "-53px -39px";
       break;
     case 3:
-      imgSrc = threeImg;
-      allCardsUsedImgSrc = grayThreeImg;
+      backgroundPosition = "-106px 0";
+      grayCardBackgroundPosition = "-106px -39px";
       break;
     case 4:
-      imgSrc = fourImg;
-      allCardsUsedImgSrc = grayFourImg;
+      backgroundPosition = "-159px 0";
+      grayCardBackgroundPosition = "-159px -39px";
       break;
     case 5:
-      imgSrc = fiveImg;
-      allCardsUsedImgSrc = grayFiveImg;
+      backgroundPosition = "-212px 0";
+      grayCardBackgroundPosition = "-212px -39px";
       break;
     case 6:
-      imgSrc = kingImg;
-      allCardsUsedImgSrc = grayKingImg;
+      backgroundPosition = "0 -78px";
+      grayCardBackgroundPosition = "-53px -78px";
       break;
     case 7:
-      imgSrc = grayFiveImg;
+      backgroundPosition = "-212px -39px";
       break;
     default:
-      imgSrc = faceDownCardImg;
+      backgroundPosition = "-106px -78px";
   }
 
   if (isButton) {
@@ -126,42 +95,54 @@ const Card: React.FC<CardProps> = ({
       buttonWithCardLimit = true;
       if (usedCards === maxCardQuantity) {
         allCardsUsed = true;
-        imgSrc = allCardsUsedImgSrc;
+        backgroundPosition = grayCardBackgroundPosition;
       }
     }
   }
 
   return (
     <div
-      className={`relative
+      className={`relative bg-sprite bg-no-repeat w-[50px] 
         ${isSelected && "brightness-125 scale-105 cursor-pointer"}
         ${isButton && !allCardsUsed && "hover:scale-105 cursor-pointer"}
-        ${allCardsUsed && "cursor-not-allowed"}
         ${!allCardsUsed && "hover:brightness-125 cursor-pointer"}
+        ${allCardsUsed && "cursor-not-allowed"}
       }`}
+      style={{
+        width: "50px",
+        height: "36px",
+        position: "relative",
+        overflow: "hidden",
+        backgroundPosition,
+      }}
       onClick={() => onClick(cardNumber, usedCards, maxCardQuantity)}
     >
-      <Image src={imgSrc} alt="Card" width={50} height={36} priority={true} />
-
-      {cardNumber === 7 && probabilityOfFive > 0 && (
-        <span
-          className="
+      <div
+        className="bg-cover"
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        {cardNumber === 7 && probabilityOfFive > 0 && (
+          <span
+            className="
          text-xs text-red-50 absolute -bottom-1 right-0 cursor-pointer"
-          style={{ userSelect: "none" }}
-        >
-          {Math.round(probabilityOfFive * 1000) / 10}%
-        </span>
-      )}
-      {buttonWithCardLimit && (
-        <span
-          className={`text-xs text-red-50 bg-zinc-950/50 rounded absolute -bottom-1 right-0 px-1
-              ${!allCardsUsed && "cursor-pointer"}
+            style={{ userSelect: "none" }}
+          >
+            {Math.round(probabilityOfFive * 1000) / 10}%
+          </span>
+        )}
+        {buttonWithCardLimit && (
+          <span
+            className={`text-xs text-red-50 bg-zinc-950/50 rounded absolute -bottom-1 right-0 px-1 cursor-pointer
               ${allCardsUsed && "saturate-0 cursor-not-allowed"}`}
-          style={{ userSelect: "none" }}
-        >
-          {usedCards}/{maxCardQuantity}
-        </span>
-      )}
+            style={{ userSelect: "none" }}
+          >
+            {usedCards}/{maxCardQuantity}
+          </span>
+        )}
+      </div>
     </div>
   );
 };
