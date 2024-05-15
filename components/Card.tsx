@@ -141,7 +141,7 @@ const Card: React.FC<CardProps> = ({
       }`}
       onClick={() => onClick(cardNumber, usedCards, maxCardQuantity)}
     >
-      <Image src={imgSrc} alt="Card" width={50} height={36} priority />
+      <Image src={imgSrc} alt="Card" width={50} height={36} priority={true} />
 
       {cardNumber === 7 && probabilityOfFive > 0 && (
         <span
