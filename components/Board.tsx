@@ -676,18 +676,7 @@ const Board: React.FC = () => {
           height={220}
           style={{ position: "absolute" }}
         />
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(5, 50px)",
-            gridTemplateRows: "repeat(5, 36px)",
-            gap: "1px",
-            width: "265px",
-            height: "220px",
-            padding: "5px",
-            backgroundPosition: "0 -117px",
-          }}
-        >
+        <div className="grid grid-cols-5 grid-rows-[repeat(5,_36px)] gap-px p-[5px] mb-10">
           {boardState.map((row, rowIndex) =>
             row.map((card, colIndex) => (
               <Card
