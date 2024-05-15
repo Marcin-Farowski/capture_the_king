@@ -1,4 +1,35 @@
 import React from "react";
+import Image, { StaticImageData } from "next/image";
+import oneImg from "../public/assets/one.png";
+import twoImg from "../public/assets/two.png";
+import threeImg from "../public/assets/three.png";
+import fourImg from "../public/assets/four.png";
+import fiveImg from "../public/assets/five.png";
+import kingImg from "../public/assets/king.png";
+import faceDownCardImg from "../public/assets/face-down-card.png";
+import grayOneImg from "../public/assets/gray-one.png";
+import grayTwoImg from "../public/assets/gray-two.png";
+import grayThreeImg from "../public/assets/gray-three.png";
+import grayFourImg from "../public/assets/gray-four.png";
+import grayFiveImg from "../public/assets/gray-five.png";
+import grayKingImg from "../public/assets/gray-king.png";
+
+// Preload images
+const preloadedImages = [
+  oneImg,
+  twoImg,
+  threeImg,
+  fourImg,
+  fiveImg,
+  kingImg,
+  faceDownCardImg,
+  grayOneImg,
+  grayTwoImg,
+  grayThreeImg,
+  grayFourImg,
+  grayFiveImg,
+  grayKingImg,
+];
 
 interface CardProps {
   row?: number;
@@ -27,45 +58,45 @@ const Card: React.FC<CardProps> = ({
   usedCards = 0,
   onClick,
 }) => {
-  let imgSrc: string;
+  let imgSrc: StaticImageData;
   let maxCardQuantity = 0;
   let buttonWithCardLimit = false;
   let allCardsUsed = false;
-  let allCardsUsedImgSrc: string = "/assets/face-down-card.png";
+  let allCardsUsedImgSrc: StaticImageData = faceDownCardImg;
 
   switch (cardNumber) {
     case 0:
-      imgSrc = "/assets/face-down-card.png";
+      imgSrc = faceDownCardImg;
       break;
     case 1:
-      imgSrc = `/assets/one.png`;
-      allCardsUsedImgSrc = `/assets/gray-one.png`;
+      imgSrc = oneImg;
+      allCardsUsedImgSrc = grayOneImg;
       break;
     case 2:
-      imgSrc = `/assets/two.png`;
-      allCardsUsedImgSrc = `/assets/gray-two.png`;
+      imgSrc = twoImg;
+      allCardsUsedImgSrc = grayTwoImg;
       break;
     case 3:
-      imgSrc = `/assets/three.png`;
-      allCardsUsedImgSrc = `/assets/gray-three.png`;
+      imgSrc = threeImg;
+      allCardsUsedImgSrc = grayThreeImg;
       break;
     case 4:
-      imgSrc = `/assets/four.png`;
-      allCardsUsedImgSrc = `/assets/gray-four.png`;
+      imgSrc = fourImg;
+      allCardsUsedImgSrc = grayFourImg;
       break;
     case 5:
-      imgSrc = `/assets/five.png`;
-      allCardsUsedImgSrc = `/assets/gray-five.png`;
+      imgSrc = fiveImg;
+      allCardsUsedImgSrc = grayFiveImg;
       break;
     case 6:
-      imgSrc = `/assets/king.png`;
-      allCardsUsedImgSrc = `/assets/gray-king.png`;
+      imgSrc = kingImg;
+      allCardsUsedImgSrc = grayKingImg;
       break;
     case 7:
-      imgSrc = `/assets/gray-five.png`;
+      imgSrc = grayFiveImg;
       break;
     default:
-      imgSrc = "/assets/face-down-card.png";
+      imgSrc = faceDownCardImg;
   }
 
   if (isButton) {
@@ -110,7 +141,7 @@ const Card: React.FC<CardProps> = ({
       }`}
       onClick={() => onClick(cardNumber, usedCards, maxCardQuantity)}
     >
-      <img src={imgSrc} alt={"Card " + cardNumber} width={50} height={36} />
+      <Image src={imgSrc} alt="Card" width={50} height={36} priority />
 
       {cardNumber === 7 && probabilityOfFive > 0 && (
         <span
