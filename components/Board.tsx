@@ -682,7 +682,7 @@ const Board: React.FC = () => {
         )}
       </div>
       {selectedCardPosition !== null && (
-        <div className="flex flex-wrap-reverse gap-1 w-96 justify-center">
+        <div className="flex flex-wrap-reverse gap-1 max-w-96 justify-center">
           {[...Array(8)].map((_, index) => (
             <Card
               key={index}
