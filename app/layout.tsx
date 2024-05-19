@@ -8,7 +8,7 @@ const catamaran = Catamaran({
 });
 
 export const metadata: Metadata = {
-  title: "Zdominuj Schwytaj Króla | Twoje Narzędzie do Sukcesu w Grze",
+  title: "Schwytaj Króla | Twoje Narzędzie do Sukcesu w Grze",
   description:
     "Zdobądź przewagę w Schwytaj Króla dzięki naszej aplikacji: optymalizuj strategie, śledź postępy i korzystaj z zaawansowanych funkcji.",
   keywords: [
