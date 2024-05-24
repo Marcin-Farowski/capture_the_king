@@ -106,6 +106,11 @@ const Board: React.FC = () => {
 
     countUsedCards(boardWithFivesProbability, usedCardsQuantityRef);
 
+    findCardsWithoutRevealedNeighbours(
+      cardsAdjacentToFive,
+      boardWithFivesProbability
+    );
+
     setBoardState(boardWithFivesProbability);
   };
 
@@ -656,6 +661,10 @@ const Board: React.FC = () => {
       for (let j = -1; j <= 1; j++) {
         const newRow = row + i;
         const newCol = col + j;
+        // Pominięcie aktualnej karty
+        if (i === 0 && j === 0) {
+          continue;
+        }
         if (
           newRow >= 0 &&
           newRow < boardState.length &&
@@ -669,11 +678,31 @@ const Board: React.FC = () => {
         }
       }
     }
+    console.log("log");
+
     return false;
   };
 
   // Zwraca karty które nie posiadają odsłoniętej karty jako sąsiada
-  const findCardsWithoutRevealedNeighbours = (cards: CardState) => {};
+  const findCardsWithoutRevealedNeighbours = (
+    cards: CardState[],
+    boardState: CardState[][]
+  ): CardState[] => {
+    const cardsWithoutRevealdedNeighbours: CardState[] = [];
+
+    for (const card of cards) {
+      if (!hasRevealedNeighbor(card, boardState)) {
+        cardsWithoutRevealdedNeighbours.push(card);
+      }
+    }
+
+    console.log(
+      "Karta bez odsłoniętego sąsiada:",
+      cardsWithoutRevealdedNeighbours
+    );
+
+    return cardsWithoutRevealdedNeighbours;
+  };
 
   // const removePotentialFivesWithLeastPercentage = (    triplets: CardState[][],
   //   boardState: CardState[][]): CardState[][] => {
