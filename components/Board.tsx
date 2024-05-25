@@ -83,11 +83,13 @@ const Board: React.FC = () => {
     const boardWithHiddenFives = showHiddenFives(boardWithNewCard);
 
     const triplets = findTripletsWithoutCommonNeighbors(cardsAdjacentToFive);
+
     const tripletWithLeastAdjacentPotentialFives =
       findTripletWithLeastAdjacentPotentialFives(
         triplets,
         boardWithHiddenFives
       );
+
     const boardWithNumbersBasedOnNeighbors = updateNumbersBasedOnNeighbors(
       tripletWithLeastAdjacentPotentialFives,
       fivesRevealedRef.current,
@@ -104,14 +106,33 @@ const Board: React.FC = () => {
       boardWithExcludedAdjacentFivesCards
     );
 
-    countUsedCards(boardWithFivesProbability, usedCardsQuantityRef);
+    // drugi przebieg
 
-    findCardsWithoutRevealedNeighbours(
-      cardsAdjacentToFive,
+    const tripletWithLeastAdjacentPotentialFives2 =
+      findTripletWithLeastAdjacentPotentialFives(
+        triplets,
+        boardWithFivesProbability
+      );
+
+    const boardWithNumbersBasedOnNeighbors2 = updateNumbersBasedOnNeighbors(
+      tripletWithLeastAdjacentPotentialFives2,
+      fivesRevealedRef.current,
       boardWithFivesProbability
     );
 
-    setBoardState(boardWithFivesProbability);
+    const boardWithExcludedAdjacentFivesCards2 =
+      removePotentialFivesNotCommonToTwoSets(
+        boardWithNumbersBasedOnNeighbors2,
+        tripletWithLeastAdjacentPotentialFives2
+      );
+
+    const boardWithFivesProbability2 = updateProbabilityOfFives(
+      boardWithExcludedAdjacentFivesCards2
+    );
+
+    countUsedCards(boardWithFivesProbability2, usedCardsQuantityRef);
+
+    setBoardState(boardWithFivesProbability2);
   };
 
   const updateBoardWithNewCard = (newCardNumber: number): CardState[][] => {
@@ -375,19 +396,16 @@ const Board: React.FC = () => {
     if (triplets.length === 0) return null;
 
     let tripletWithLeastAdjacentPotentialFives: CardState[] = triplets[0];
-    let minAdjacentSevens = countAdjacentPotentialFives(
-      triplets[0],
-      boardState
-    );
+    let minAdjacentFives = countAdjacentPotentialFives(triplets[0], boardState);
 
     for (let i = 0; i < triplets.length; i++) {
       const currentTriplet = triplets[i];
-      const adjacentSevens = countAdjacentPotentialFives(
+      const adjacentFives = countAdjacentPotentialFives(
         currentTriplet,
         boardState
       );
-      if (adjacentSevens < minAdjacentSevens) {
-        minAdjacentSevens = adjacentSevens;
+      if (adjacentFives < minAdjacentFives) {
+        minAdjacentFives = adjacentFives;
         tripletWithLeastAdjacentPotentialFives = currentTriplet;
       }
     }
@@ -650,64 +668,6 @@ const Board: React.FC = () => {
 
     return boardState;
   };
-
-  // Sprawdza, czy wśród sąsiadów karty znajduje się odsłonięta karta
-  const hasRevealedNeighbor = (
-    card: CardState,
-    boardState: CardState[][]
-  ): boolean => {
-    const { row, col } = card;
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-        const newRow = row + i;
-        const newCol = col + j;
-        // Pominięcie aktualnej karty
-        if (i === 0 && j === 0) {
-          continue;
-        }
-        if (
-          newRow >= 0 &&
-          newRow < boardState.length &&
-          newCol >= 0 &&
-          newCol < boardState[0].length
-        ) {
-          const neighborCard = boardState[newRow][newCol];
-          if (neighborCard.cardNumber > 0 && neighborCard.cardNumber < 7) {
-            return true;
-          }
-        }
-      }
-    }
-    console.log("log");
-
-    return false;
-  };
-
-  // Zwraca karty które nie posiadają odsłoniętej karty jako sąsiada
-  const findCardsWithoutRevealedNeighbours = (
-    cards: CardState[],
-    boardState: CardState[][]
-  ): CardState[] => {
-    const cardsWithoutRevealdedNeighbours: CardState[] = [];
-
-    for (const card of cards) {
-      if (!hasRevealedNeighbor(card, boardState)) {
-        cardsWithoutRevealdedNeighbours.push(card);
-      }
-    }
-
-    console.log(
-      "Karta bez odsłoniętego sąsiada:",
-      cardsWithoutRevealdedNeighbours
-    );
-
-    return cardsWithoutRevealdedNeighbours;
-  };
-
-  // const removePotentialFivesWithLeastPercentage = (    triplets: CardState[][],
-  //   boardState: CardState[][]): CardState[][] => {
-  //     triplets.forEach
-  //   }
 
   const countUsedCards = (
     boardState: CardState[][],
